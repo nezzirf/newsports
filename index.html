@@ -2,7 +2,8 @@
 <html lang="fr" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#03050a">
     <title>Sports TCG Elite - Jeu de Booster & Équipements</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -324,6 +325,39 @@
         ::-webkit-scrollbar-track { background: #03050a; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #334155; }
+    
+        /* ===== OPTIMISATIONS SMARTPHONE : tout est limité aux écrans < 768px, l'affichage PC ne change pas ===== */
+        @media (max-width: 767px) {
+            body.h-screen { height: 100dvh; }
+            * { -webkit-tap-highlight-color: transparent; }
+            button, [onclick], select, label { touch-action: manipulation; }
+            input, select, textarea { font-size: 16px !important; }
+            #main-scroll-container { overscroll-behavior-y: contain; padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)) !important; }
+            /* En-tête compact : logo + compteurs sur une ligne */
+            aside > div:first-child { flex-direction: row !important; align-items: center !important; gap: .5rem; padding: .5rem .75rem !important; padding-top: calc(.5rem + env(safe-area-inset-top)) !important; }
+            aside > div:first-child > * { margin: 0 !important; }
+            aside > div:first-child > div:first-child { width: auto !important; flex: none; }
+            aside > div:first-child > div:first-child > div:last-child { display: none; }
+            aside > div:first-child > div:first-child > div:first-child { width: 2.25rem; height: 2.25rem; }
+            aside > div:first-child > div:last-child { flex: 1; display: flex; gap: .4rem; }
+            aside > div:first-child > div:last-child > div { flex: 1; padding: .3rem .5rem !important; margin: 0 !important; }
+            /* Son + sauvegarde : une seule ligne */
+            aside > div:last-child { flex-direction: row !important; gap: .4rem; padding: .3rem .75rem !important; }
+            aside > div:last-child > * { margin: 0 !important; flex: 1; }
+            /* Navigation : barre d'onglets fixée en bas (accessible au pouce) */
+            aside nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 45; padding: .35rem .5rem calc(.35rem + env(safe-area-inset-bottom)) !important; gap: .25rem !important; overflow: visible !important; background: rgba(8,11,18,.96); border-top: 1px solid #1e293b; backdrop-filter: blur(10px); }
+            aside nav .main-tab-btn { flex: 1; flex-direction: column; justify-content: center !important; gap: .15rem; padding: .4rem .15rem !important; min-height: 54px; font-size: 10px !important; letter-spacing: 0 !important; line-height: 1.1; text-align: center; }
+            aside nav .main-tab-btn > * { margin: 0 !important; }
+            aside nav .main-tab-btn i { font-size: 1.15rem; }
+            #toast-container { left: 0 !important; right: 0 !important; margin: 0 auto; top: calc(.5rem + env(safe-area-inset-top)) !important; }
+            /* Allègement : moins d'effets coûteux pour la batterie */
+            .aurora { filter: blur(40px) !important; animation: none !important; }
+            .bg-dots, .bg-spot { display: none; }
+            .name-banner, .pokemon-card[class*="rarity-"] .name-banner { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+            .pokemon-card { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+            .pokemon-card img { -webkit-user-drag: none; pointer-events: none; }
+            #pack-opening-modal, #card-zoom-modal, #save-modal { padding-top: calc(1rem + env(safe-area-inset-top)); padding-bottom: calc(1rem + env(safe-area-inset-bottom)); overflow-y: auto; }
+        }
     </style>
 </head>
 <body class="flex flex-col md:flex-row h-screen selection:bg-cyan-500 selection:text-white">
@@ -348,12 +382,12 @@
             <div class="w-full space-y-2">
                 <!-- COMPTEUR DE SPORTS POINTS -->
                 <div class="w-full bg-slate-900 border border-amber-500/30 px-3 py-2 rounded-xl flex items-center justify-between shadow-inner">
-                    <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5"><i class="fa-solid fa-coins"></i> Sports Points</span>
+                    <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5"><i class="fa-solid fa-coins"></i><span class="hidden sm:inline">Sports Points</span></span>
                     <span id="sports-points-display" class="font-mono font-black text-amber-300 text-sm">0 SP</span>
                 </div>
                 <!-- COMPTEUR DE CARTES POSSÉDÉES DANS LE MENU LATÉRAL -->
                 <div class="w-full bg-slate-900 border border-cyan-500/30 px-3 py-2 rounded-xl flex items-center justify-between shadow-inner">
-                    <span class="text-xs font-bold text-cyan-400 flex items-center gap-1.5"><i class="fa-solid fa-layer-group"></i> Cartes possédées</span>
+                    <span class="text-xs font-bold text-cyan-400 flex items-center gap-1.5"><i class="fa-solid fa-layer-group"></i><span class="hidden sm:inline">Cartes possédées</span></span>
                     <span id="sidebar-cards-count-badge" class="font-mono font-black text-cyan-300 text-sm">0/0</span>
                 </div>
             </div>
@@ -448,7 +482,7 @@
                             <p class="text-xs text-slate-400 mt-0.5">Acquérez des légendes historiques rarissimes (8 000 SP chacune).</p>
                         </div>
                     </div>
-                    <div id="vintage-shop-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-12"></div>
+                    <div id="vintage-shop-container" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 pb-12"></div>
                 </div>
             </section>
 
@@ -467,7 +501,7 @@
                     <h3 class="text-xl font-bold font-sport uppercase tracking-wide text-white flex items-center gap-2 mb-6 relative z-10">
                         <i class="fa-solid fa-users text-cyan-400"></i> Équipe Titulaire (5 Athlètes)
                     </h3>
-                    <div id="active-deck-slots" class="grid grid-cols-1 sm:grid-cols-5 gap-4 relative z-10"></div>
+                    <div id="active-deck-slots" class="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-4 relative z-10"></div>
                 </div>
                 <div class="textured-panel p-6 rounded-3xl space-y-4">
                     <h4 class="text-sm font-bold font-sport uppercase text-amber-300 flex items-center gap-2">
@@ -509,7 +543,7 @@
                 </div>
                 
                 <!-- Panneau de filtres avancés sticky (POINT 4) -->
-                <div class="textured-panel p-5 rounded-3xl space-y-4 sticky top-0 z-30 shadow-2xl backdrop-blur-md bg-[#03050a]/95">
+                <div class="textured-panel p-5 rounded-3xl space-y-4 md:sticky md:top-0 z-30 shadow-2xl backdrop-blur-md bg-[#03050a]/95">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800/50 pb-4">
                         <span id="collection-counter-text" class="text-sm text-amber-400 font-black font-sport tracking-wider bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20">0 / <span class="total-cards-label">0</span> DÉBLOQUÉS</span>
                         
@@ -548,7 +582,7 @@
                     </div>
                 </div>
                 
-                <div id="cards-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pb-12 mt-6 relative z-10"></div>
+                <div id="cards-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 pb-12 mt-6 relative z-10"></div>
             </section>
         </div>
     </main>
@@ -1631,7 +1665,7 @@ if (!userState.ownedEquipments || !Array.isArray(userState.ownedEquipments)) use
         async function showPackSummaryModal() {
             document.getElementById('pack-progress-title').innerText = 'RÉCAPITULATIF DU PACK';
             const container = document.getElementById('pack-single-card-container');
-            container.className = "grid grid-cols-2 sm:grid-cols-5 gap-3 w-full my-4 max-w-5xl px-2";
+            container.className = "grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 w-full my-4 max-w-5xl px-2";
             container.onclick = null;
             
             const cardsHtmlList = await Promise.all(currentPackCards.map(async (item) => {
@@ -2148,7 +2182,7 @@ if (!userState.ownedEquipments || !Array.isArray(userState.ownedEquipments)) use
         (function () {
             const scene = document.querySelector('.bg-scene'), cv = document.getElementById('bg-canvas');
             if (!scene || !cv) return;
-            const ctx = cv.getContext('2d'), reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const ctx = cv.getContext('2d'), reduce = matchMedia('(prefers-reduced-motion: reduce)').matches || matchMedia('(max-width: 767px)').matches;
             const cols = ['251,191,36', '56,189,248', '244,114,182', '255,255,255'];
             const m = { tx: innerWidth / 2, ty: innerHeight * 0.4, sx: innerWidth / 2, sy: innerHeight * 0.4, on: false };
             let ps = [], sparks = [];
